@@ -1,0 +1,114 @@
+import java.util.*;
+
+public class SistemaEntradas {
+
+    static int totalVendidas = 0, disponibles = 100, contador = 1;
+    static double ingresos = 0;
+    static ArrayList<Entrada> entradas = new ArrayList<>();
+
+    static class Entrada {
+        int numero;
+        String ubicacion, tipo;
+        double precio;
+
+        Entrada(int num, String ubi, String tipo, double precio) {
+            this.numero = num;
+            this.ubicacion = ubi;
+            this.tipo = tipo;
+            this.precio = precio;
+        }
+
+        public String toString() {
+            return "N°" + numero + " | " + ubicacion + " | " + tipo + " | $" + precio;
+        }
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int opcion;
+        do {
+            System.out.println("\n1. Vender entrada\n2. Promociones\n3. Buscar\n4. Eliminar\n5. Salir");
+            System.out.print("Opcion: ");
+            opcion = sc.nextInt();
+
+            switch (opcion) {
+                case 1 -> vender(sc);
+                case 2 -> System.out.println("- 10% Estudiantes\n- 15% Tercera Edad");
+                case 3 -> buscar(sc);
+                case 4 -> eliminar(sc);
+                case 5 -> System.out.println("Gracias por su visita.");
+                default -> System.out.println("Opcion invalida.");
+            }
+        } while (opcion != 5);
+    }
+
+    static void vender(Scanner sc) {
+        if (disponibles == 0) {
+            System.out.println("Entradas agotadas.");
+            return;
+        }
+
+        System.out.print("Ubicacion (Zona A|B|C): ");
+        String ubi = sc.next();
+        double precioBase;
+
+        if (ubi.equalsIgnoreCase("A")) {
+            precioBase = 10000;
+        } else if (ubi.equalsIgnoreCase("B")) {
+            precioBase = 15000;
+        } else if (ubi.equalsIgnoreCase("C")) {
+            precioBase = 25000;
+        } else {
+            System.out.println("Ubicacion inválida.");
+            return;
+        }
+
+        System.out.print("¿Estudiante? (s/n): ");
+        boolean estudiante = sc.next().equalsIgnoreCase("s");
+        System.out.print("¿Tercera edad? (s/n): ");
+        boolean tercera = sc.next().equalsIgnoreCase("s");
+
+        double desc = estudiante ? 0.10 : (tercera ? 0.15 : 0);
+        String tipo = estudiante ? "Estudiante" : (tercera ? "Tercera edad" : "General");
+        double precio = precioBase * (1 - desc);
+
+        entradas.add(new Entrada(contador++, ubi, tipo, precio));
+        disponibles--;
+        totalVendidas++;
+        ingresos += precio;
+
+        System.out.printf("Precio total: $%.2f\n", precio);
+    }
+
+    static void buscar(Scanner sc) {
+        System.out.println("Buscar por:\n1. Numero\n2. Ubicación\n3. Tipo");
+        int op = sc.nextInt();
+        System.out.print("Valor: ");
+        String valor = sc.next();
+
+        for (Entrada e : entradas) {
+            if ((op == 1 && Integer.toString(e.numero).equals(valor)) ||
+                (op == 2 && e.ubicacion.equalsIgnoreCase(valor)) ||
+                (op == 3 && e.tipo.equalsIgnoreCase(valor))) {
+                System.out.println(e);
+            }
+        }
+    }
+
+    static void eliminar(Scanner sc) {
+        System.out.print("N° de entrada a eliminar: ");
+        int num = sc.nextInt();
+        for (Iterator<Entrada> it = entradas.iterator(); it.hasNext();) {
+            Entrada e = it.next();
+            if (e.numero == num) {
+                it.remove();
+                totalVendidas--;
+                disponibles++;
+                ingresos -= e.precio;
+                System.out.println("Entrada eliminada.");
+                return;
+            }
+        }
+        System.out.println("No encontrada.");
+    }
+}
